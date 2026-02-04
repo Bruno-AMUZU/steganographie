@@ -67,6 +67,17 @@ class ConvertisseurJPEGPNG:
         )
         self.btn_convertir.grid(row=0, column=1, padx=5)
 
+        # Bouton pour convertir les PNG en RGB (sans suppression ni changement d'extension)
+        self.btn_convertir_rgb = Button(
+            frame_btns,
+            text="Convertir les PNG en RGB",
+            font=("Segoe UI", 10),
+            command=self.convertir_en_rgb,
+            width=28,
+            state="disabled",
+        )
+        self.btn_convertir_rgb.grid(row=1, column=0, columnspan=2, pady=(10, 0))
+
         # Barre de progression
         self.progress = Progressbar(self.root, orient="horizontal", length=500, mode="determinate")
         self.progress.pack(pady=(15, 5))
@@ -90,6 +101,7 @@ class ConvertisseurJPEGPNG:
         self.dossier_selectionne.set(f"Dossier : {self.dossier}")
         self.status.set("Dossier sélectionné. Cliquez sur « Convertir et supprimer les JPEG » pour commencer.")
         self.btn_convertir.config(state="normal")
+        self.btn_convertir_rgb.config(state="normal")
 
     def _trouver_images_jpeg(self) -> list[Path]:
         jpeg_ext = {".jpg", ".jpeg", ".JPG", ".JPEG"}
@@ -98,6 +110,17 @@ class ConvertisseurJPEGPNG:
             for nom in noms_fichiers:
                 chemin = Path(racine) / nom
                 if chemin.suffix in jpeg_ext:
+                    fichiers.append(chemin)
+        return fichiers
+
+    def _trouver_images_png(self) -> list[Path]:
+        """Retourne la liste des images PNG dans le dossier sélectionné."""
+        png_ext = {".png", ".PNG"}
+        fichiers = []
+        for racine, _, noms_fichiers in os.walk(self.dossier):
+            for nom in noms_fichiers:
+                chemin = Path(racine) / nom
+                if chemin.suffix in png_ext:
                     fichiers.append(chemin)
         return fichiers
 
@@ -150,6 +173,49 @@ class ConvertisseurJPEGPNG:
         self.status.set("Conversion terminée.")
         messagebox.showinfo("Terminé", message)
         self.btn_convertir.config(state="normal")
+
+    def convertir_en_rgb(self) -> None:
+        """Convertit les images PNG en place en mode RGB sans supprimer les fichiers."""
+        if not hasattr(self, "dossier") or not self.dossier.exists():
+            messagebox.showerror("Erreur", "Aucun dossier valide sélectionné.")
+            return
+
+        fichiers = self._trouver_images_png()
+        if not fichiers:
+            messagebox.showinfo("Aucune image", "Aucune image PNG trouvée dans ce dossier.")
+            return
+
+        total = len(fichiers)
+        self.progress["value"] = 0
+        self.progress["maximum"] = total
+        self.status.set(f"{total} image(s) trouvée(s). Conversion en RGB en cours...")
+        self.btn_convertir_rgb.config(state="disabled")
+        self.root.update_idletasks()
+
+        converties = 0
+        erreurs = 0
+
+        for i, chemin_jpeg in enumerate(fichiers, start=1):
+            try:
+                with Image.open(chemin_jpeg) as img:
+                    img = img.convert("RGB")
+                    img.save(chemin_jpeg)
+                converties += 1
+            except Exception as e:  # noqa: BLE001
+                print(f"Erreur sur {chemin_jpeg}: {e}")
+                erreurs += 1
+
+            self.progress["value"] = i
+            self.status.set(f"Conversion en RGB... ({i}/{total})")
+            self.root.update_idletasks()
+
+        message = f"Conversion en RGB terminée.\n\nImages converties : {converties}"
+        if erreurs:
+            message += f"\nErreurs : {erreurs} (voir la console)"
+
+        self.status.set("Conversion en RGB terminée.")
+        messagebox.showinfo("Terminé", message)
+        self.btn_convertir_rgb.config(state="normal")
 
 
 def main() -> None:
