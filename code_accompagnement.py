@@ -28,7 +28,7 @@ def cacher_message(image_path, message, output_path):
     print(f"Message caché dans {output_path}")
 
 # Exemple d'utilisation
-cacher_message("image1.png", "Secret NSI 2026", "image_codee.png")
+#cacher_message("image1.png", "Secret NSI 2026", "image_codee.png")
 
 
 
@@ -66,7 +66,7 @@ def extraire_message(image_path):
     return "Aucun marqueur de fin trouvé."
 
 # Exemple d'utilisation :
-print(extraire_message("image_codee.png"))
+#print(extraire_message("image_codee.png"))
 
 
 
