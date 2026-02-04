@@ -5,10 +5,10 @@ def message_to_bin(message):
     return ''.join(format(ord(i), '08b') for i in message)
 
 def cacher_message(image_path, message, output_path):
-    img = Image.open(image_path)
+    img = Image.open(image_path).convert("RGB")
     binary_msg = message_to_bin(message) + '1111111111111110' # Marqueur de fin
     
-    pixels = img.load().convert("RGB")
+    pixels = img.load()
     width, height = img.size
     
     idx = 0
@@ -28,7 +28,7 @@ def cacher_message(image_path, message, output_path):
     print(f"Message caché dans {output_path}")
 
 # Exemple d'utilisation
-cacher_message("image_originale.png", "Secret NSI 2026", "image_codee.png")
+cacher_message("image1.png", "Secret NSI 2026", "image_codee.png")
 
 
 
@@ -36,8 +36,8 @@ cacher_message("image_originale.png", "Secret NSI 2026", "image_codee.png")
 from PIL import Image
 
 def extraire_message(image_path):
-    img = Image.open(image_path)
-    pixels = img.load().convert("RGB")
+    img = Image.open(image_path).convert("RGB")
+    pixels = img.load()
     width, height = img.size
     
     bits_extraits = ""
