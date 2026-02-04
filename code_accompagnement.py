@@ -8,7 +8,7 @@ def cacher_message(image_path, message, output_path):
     img = Image.open(image_path)
     binary_msg = message_to_bin(message) + '1111111111111110' # Marqueur de fin
     
-    pixels = img.load()
+    pixels = img.load().convert("RGB")
     width, height = img.size
     
     idx = 0
@@ -37,7 +37,7 @@ from PIL import Image
 
 def extraire_message(image_path):
     img = Image.open(image_path)
-    pixels = img.load()
+    pixels = img.load().convert("RGB")
     width, height = img.size
     
     bits_extraits = ""
