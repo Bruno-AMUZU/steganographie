@@ -72,21 +72,58 @@ def extraire_message(image_path):
 
 import random
 
+
 def generer_points_aleatoires(largeur, hauteur, nb_bits, graine):
     # On initialise le générateur avec la clé (la graine)
     random.seed(graine)
-    
+
     # Création de la liste de tous les indices possibles (linéaires)
     indices_possibles = list(range(largeur * hauteur))
-    
+
     # On pioche nb_bits indices sans remise (pour ne pas modifier deux fois le même pixel)
     indices_choisis = random.sample(indices_possibles, nb_bits)
-    
+
     # Conversion des indices linéaires en coordonnées (x, y)
     points = []
     for i in indices_choisis:
         x = i % largeur
         y = i // largeur
         points.append((x, y))
-        
+
     return points
+
+
+def image_difference(image_path1, image_path2, output_path):
+    """
+    Crée une nouvelle image représentant la différence entre deux images.
+
+    - Si les deux images n'ont pas la même taille, la fonction ne fait rien.
+    - Sinon, elle crée une image où :
+        * les pixels identiques sont en blanc (255, 255, 255)
+        * les pixels différents sont en rouge (255, 0, 0)
+    """
+    img1 = Image.open(image_path1).convert("RGB")
+    img2 = Image.open(image_path2).convert("RGB")
+
+    if img1.size != img2.size:
+        # Tailles différentes : on ne fait rien
+        print("Les images n'ont pas la même taille, aucune image de différence n'est créée.")
+        return
+
+    width, height = img1.size
+    diff_img = Image.new("RGB", (width, height), (255, 255, 255))
+    pixels1 = img1.load()
+    pixels2 = img2.load()
+    pixels_diff = diff_img.load()
+
+    for y in range(height):
+        for x in range(width):
+            if pixels1[x, y] == pixels2[x, y]:
+                # Pixels identiques -> blanc
+                pixels_diff[x, y] = (255, 255, 255)
+            else:
+                # Pixels différents -> rouge
+                pixels_diff[x, y] = (255, 0, 0)
+
+    diff_img.save(output_path)
+    print(f"Image de différence enregistrée dans {output_path}")
