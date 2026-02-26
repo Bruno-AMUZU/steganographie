@@ -127,3 +127,29 @@ def image_difference(image_path1, image_path2, output_path):
 
     diff_img.save(output_path)
     print(f"Image de différence enregistrée dans {output_path}")
+
+
+def visualiser_lsb_rouge(image_path, output_path):
+    """
+    Crée une image qui ne montre que la valeur du bit de poids faible
+    du canal Rouge de chaque pixel.
+
+    - Si le LSB de R vaut 0 → pixel noir (0)
+    - Si le LSB de R vaut 1 → pixel blanc (255)
+    """
+    img = Image.open(image_path).convert("RGB")
+    width, height = img.size
+    pixels_src = img.load()
+
+    # Image de sortie en niveaux de gris (L) ou RGB noir/blanc
+    vis = Image.new("L", (width, height), 0)
+    pixels_vis = vis.load()
+
+    for y in range(height):
+        for x in range(width):
+            r, g, b = pixels_src[x, y]
+            visualisation_lsb = (r & 1) * 255  # 0 ou 255
+            pixels_vis[x, y] = visualisation_lsb
+
+    vis.save(output_path)
+    print(f"Visualisation du LSB rouge enregistrée dans {output_path}")
